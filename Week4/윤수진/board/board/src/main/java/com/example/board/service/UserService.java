@@ -14,9 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final JwtProvider jwtProvider;  // JwtProvider 주입
+    private final JwtProvider jwtProvider;
 
-    // 회원가입
     @Transactional
     public void signup(SignupRequest request) {
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
@@ -25,12 +24,11 @@ public class UserService {
 
         User user = new User();
         user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword()); // 실제로는 암호화 필요
+        user.setPassword(request.getPassword()); // 실제 서비스에선 암호화 필요
 
         userRepository.save(user);
     }
 
-    // 로그인
     @Transactional(readOnly = true)
     public String login(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
@@ -40,7 +38,6 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 로그인 성공 시 JWT 토큰 생성해서 반환
         return jwtProvider.createToken(user.getUsername());
     }
 }

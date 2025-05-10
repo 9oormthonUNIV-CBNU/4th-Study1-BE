@@ -10,8 +10,8 @@ import java.util.Date;
 @Component
 public class JwtProvider {
 
-    private static final long EXPIRATION_TIME = 1000 * 60 * 60; // 1시간 (ms 단위)
-    private static final String SECRET_KEY = "my-super-secret-key-my-super-secret-key"; // 256bit 이상 필요
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60; // 1시간
+    private static final String SECRET_KEY = "my-super-secret-key-my-super-secret-key"; // 실제 서비스에서는 환경변수로 관리
 
     private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
 
@@ -28,17 +28,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    // 토큰에서 사용자 이름 추출
-    public String getUsername(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-    // 토큰 유효성 검증
+    // 토큰 검증
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -51,12 +41,13 @@ public class JwtProvider {
         }
     }
 
+    // 토큰에서 사용자명 추출
     public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parser()
+        return Jwts.parserBuilder()
                 .setSigningKey(key)
+                .build()
                 .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getSubject();
+                .getBody()
+                .getSubject();
     }
 }
